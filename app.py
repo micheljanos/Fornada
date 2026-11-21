@@ -288,6 +288,23 @@ with abas[6]:
                                      np.where(piv > mn, 'background-color:#CFE0F7;color:#0B1F5C', '')), index=piv.index, columns=piv.columns)
     st.markdown('**Hoje / mínimo, por setor e dia** (vermelho: falta gente; azul: sobra)')
     st.dataframe(txt.style.apply(cor, axis=None), width='stretch', height=36 * (len(txt) + 1) + 24)
+    st.markdown('**Quantas pessoas folgam em cada dia, por setor**')
+    nota('Hoje, as folgas vêm da coluna "grupo_de_folga" da aba "Equipe" da planilha: cada pessoa tem um par fixo de dias de folga. '
+         'Na escala ótima, as folgas se concentram nos dias de menos movimento. O total de pessoas quase não muda; muda o dia da folga.')
+    fh, fo = [], []
+    for r in E['R'].itertuples():
+        fh.append([r.setor] + [int(r.atual - r.atual_dia[j]) for j in ordem])
+        fo.append([r.setor] + [int(r.otimo - r.otimo_dia[j]) for j in ordem])
+    FH = pd.DataFrame(fh, columns=['setor'] + nomes).set_index('setor'); FO = pd.DataFrame(fo, columns=['setor'] + nomes).set_index('setor')
+    FH.loc['Total'] = FH.sum(); FO.loc['Total'] = FO.sum()
+    st.markdown('Folgas hoje'); st.dataframe(FH, width='stretch', height=36 * (len(FH) + 1) + 24)
+    st.markdown('Folgas na escala ótima'); st.dataframe(FO, width='stretch', height=36 * (len(FO) + 1) + 24)
+    with st.expander('Ver a equipe (aba "Equipe" da planilha)'):
+        PAR = {'G1': 'dom e seg', 'G2': 'seg e ter', 'G3': 'ter e qua', 'G4': 'qua e qui', 'G5': 'qui e sex', 'G6': 'sex e sáb', 'G7': 'sáb e dom', 'férias': 'em férias'}
+        EQv = B.EQ[['matricula', 'setor', 'funcao', 'turno', 'grupo_de_folga']].copy()
+        EQv['folga'] = EQv.grupo_de_folga.map(PAR)
+        st.dataframe(EQv, hide_index=True, width='stretch', height=420)
+        st.dataframe(EQv.groupby('folga').size().rename('pessoas').reindex([v for v in PAR.values()]).dropna().astype(int).to_frame().T, width='stretch')
     ot = E['R'].set_index('setor')[['atual', 'otimo']].rename(columns={'atual': 'pessoas hoje', 'otimo': 'pessoas na escala ótima'})
     st.markdown('**Pessoas por setor**')
     st.dataframe(ot, width='stretch', height=36 * (len(ot) + 1) + 24)
