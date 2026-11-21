@@ -16,7 +16,7 @@ div[data-testid="stMetricLabel"] p {font-size:15px}
 </style>""", unsafe_allow_html=True)
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
-DEMO = os.path.join(AQUI, 'dados', 'Fornada_base_ficticia.xlsx')
+DEMO = next((p for p in (os.path.join(AQUI, 'dados', 'Fornada_base_ficticia.xlsx'), os.path.join(AQUI, 'Fornada_base_ficticia.xlsx')) if os.path.exists(p)), '')
 FERIADOS = {dt.date(2026, 11, 2): 'Finados', dt.date(2026, 11, 15): 'Proclamação da República',
             dt.date(2026, 11, 20): 'Consciência Negra', dt.date(2026, 12, 25): 'Natal',
             dt.date(2027, 1, 1): 'Confraternização Universal'}
